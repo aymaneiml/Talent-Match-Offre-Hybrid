@@ -5,4 +5,5 @@ pgvector
 google-genai
 pymupdf
 python-dotenv
-pydantic
+pydanticgroq
+python-multipart
