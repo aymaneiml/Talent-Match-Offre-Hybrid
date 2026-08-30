@@ -1,20 +1,25 @@
-import types
+from google.genai import types
 import os
 # pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 from google import genai
+from groq import Groq
 
 #charger la variable GOOGLE_API_KEY depuis le fichier .env
 load_dotenv()
 
-#initalisation du client unique pour tous les models
+# 1. Groq pour le texte (0 Go sur ton PC)
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-client = genai.Client()
+# 2. Gemini pour la vectorisation (0 Go sur ton PC)
+gemini_client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
 
-def nettoyer_et_structurer_cv(texte_brut: str):
+# On choisit l'un des modèles disponibles dans ta liste Groq
+GROQ_MODEL = "openai/gpt-oss-20b"
+
+def nettoyer_et_structurer_cv(texte_brut: str) -> str:
     """
-    Étape 1 : Le modèle LOURD (Gemini 1.5 Pro).
-    Prend le texte brut du PDF, retire le bruit et structure les données clés.
+    Étape 1 : Groq nettoie et structure le texte extrait du PDF.
     """
     prompt = f"""
     Tu es un expert RH. Voici le texte brut extrait d'un CV, qui peut contenir des erreurs de formatage.
@@ -24,19 +29,18 @@ def nettoyer_et_structurer_cv(texte_brut: str):
     Texte brut :
     {texte_brut}
     """
-
-    response = client.models.generate_content(
-        model='gemini-1.5-pro',
-        contents=prompt
+    
+    chat_completion = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model=GROQ_MODEL, 
+        temperature=0.3
     )
+    return chat_completion.choices[0].message.content
 
-    return response.text
 
-
-def classifier_secteur(texte_propre: str)->str:
+def classifier_secteur(texte_propre: str) -> str:
     """
-    Étape 2 : Le modèle RAPIDE (Gemini 1.5 Flash).
-    Déduit le secteur d'activité pour notre filtre SQL hybride.
+    Étape 2 : Groq déduit le secteur d'activité.
     """
     prompt = f"""
     Tu es un algorithme de classification. Analyse ce résumé de CV et retourne UNIQUEMENT le nom du secteur d'activité principal parmi cette liste : 
@@ -46,22 +50,23 @@ def classifier_secteur(texte_propre: str)->str:
     CV :
     {texte_propre}
     """
-
-    response = client.models.generate_content(
-        model='gemini-1.5-flash',
-        contents=prompt
+    
+    chat_completion = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model=GROQ_MODEL,
+        temperature=0.1 
     )
+    return chat_completion.choices[0].message.content.strip()
 
-    return response.text.strip()
 
 def generer_embedding(texte: str)->list[float]:
     """
-    Étape 3 : Le modèle VECTORIEL (text-embedding-004).
+    Étape 3 : Le modèle VECTORIEL (gemini-embedding-2).
     Transforme le texte propre en un vecteur de 768 dimensions.
     """
 
-    response = client.models.embed_content(
-        model='text-embedding-004',
+    response = gemini_client.models.embed_content(
+        model='gemini-embedding-2',
         contents=texte,
         config=types.EmbedContentConfig(
             task_type='RETRIEVAL_DOCUMENT'

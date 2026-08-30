@@ -2,7 +2,7 @@ services:
   # --- BASE DE DONNÉES (PostgreSQL + pgvector) ---
   db:
     image: pgvector/pgvector:pg16
-    container_name: matchmycv_db
+    container_name: talentMatchOffer_db
     ports:
       - "5433:5432" # Accessible sur 5433 depuis ton PC, 5432 dans Docker
     environment:
@@ -16,3 +16,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  postgres_data:
