@@ -1,0 +1,18 @@
+services:
+  # --- BASE DE DONNÉES (PostgreSQL + pgvector) ---
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: matchmycv_db
+    ports:
+      - "5433:5432" # Accessible sur 5433 depuis ton PC, 5432 dans Docker
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: cv_database
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d cv_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
