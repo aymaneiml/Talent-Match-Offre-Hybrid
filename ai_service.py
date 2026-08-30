@@ -1,0 +1,1 @@
+# Toutes les fonctions qui appellent Gemini (Pro, Flash, Embeddings)
