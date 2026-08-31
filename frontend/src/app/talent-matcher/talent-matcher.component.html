@@ -1,0 +1,85 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="glass-header">
+    <div class="logo">
+      <span class="logo-icon">✨</span>
+      <h1>Talent Match <span>AI</span></h1>
+    </div>
+    <p class="subtitle">L'intelligence artificielle au service de vos recrutements</p>
+  </header>
+
+  <main class="grid-layout">
+    <!-- Zone Upload CV -->
+    <section class="card upload-card glass-panel">
+      <h2>1. Ajouter un CV (Base de données)</h2>
+      <p>Alimentez le vivier avec un nouveau profil PDF.</p>
+      
+      <div class="file-drop-area" [class.file-selected]="selectedFile">
+        <input type="file" (change)="onFileSelected($event)" accept=".pdf" />
+        <span class="file-msg">{{ selectedFile ? selectedFile.name : 'Cliquez ou glissez un fichier PDF ici' }}</span>
+      </div>
+
+      <button 
+        class="primary-btn" 
+        [disabled]="!selectedFile || uploadStatus === 'uploading'"
+        (click)="uploadCV()">
+        <span *ngIf="uploadStatus !== 'uploading'">🚀 Indexer le CV</span>
+        <span *ngIf="uploadStatus === 'uploading'" class="loader"></span>
+      </button>
+
+      <!-- Alertes Upload -->
+      <div class="alert success-alert" *ngIf="uploadStatus === 'success'">
+        {{ uploadMessage }}
+      </div>
+      <div class="alert error-alert" *ngIf="uploadStatus === 'error'">
+        {{ uploadMessage }}
+      </div>
+    </section>
+
+    <!-- Zone Matching Offre -->
+    <section class="card match-card glass-panel">
+      <h2>2. Trouver les Meilleurs Candidats</h2>
+      <p>Décrivez votre offre d'emploi, l'IA trouvera les profils pertinents par similarité sémantique.</p>
+      
+      <textarea 
+        [(ngModel)]="jobDescription" 
+        placeholder="Ex: Je recherche un développeur PHP expérimenté avec Symfony pour une mission..."
+        rows="5"
+      ></textarea>
+
+      <button 
+        class="gradient-btn" 
+        [disabled]="!jobDescription || matchStatus === 'searching'"
+        (click)="matchOffer()">
+        <span *ngIf="matchStatus !== 'searching'">🔍 Lancer le Matching Hybride</span>
+        <span *ngIf="matchStatus === 'searching'" class="loader"></span>
+      </button>
+    </section>
+  </main>
+
+  <!-- Zone Résultats (Affichée uniquement si on a des résultats) -->
+  <section class="results-section" *ngIf="matchResults">
+    <div class="results-header">
+      <h2>Top Candidats ({{ matchResults.candidats_trouves }})</h2>
+      <span class="badge sector-badge">Secteur ciblé : {{ matchResults.secteur_offre }}</span>
+    </div>
+    
+    <div class="candidates-grid">
+      <div class="candidate-card glass-panel" *ngFor="let match of matchResults.top_matchs; let i = index">
+        <div class="rank">#{{ i + 1 }}</div>
+        <div class="candidate-info">
+          <h3>{{ match.nom_fichier }}</h3>
+          <div class="progress-bar-container">
+            <div class="progress-bar" [style.width]="match.score_similarite + '%'"></div>
+          </div>
+          <span class="score-text">{{ match.score_similarite }}% de pertinence</span>
+        </div>
+      </div>
+
+      <!-- Message si aucun candidat -->
+      <div class="no-results" *ngIf="matchResults.candidats_trouves === 0">
+        <p>Aucun CV correspondant trouvé dans ce secteur avec un score suffisant. Essayez d'uploader de nouveaux CV ou d'élargir votre description.</p>
+      </div>
+    </div>
+  </section>
+</div>

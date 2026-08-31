@@ -9,9 +9,8 @@ L'originalité de ce projet réside dans son **approche hybride** : il combine u
 ## 🛠️ Stack Technologique
 * **Framework Web** : FastAPI (Python)
 * **Base de données** : PostgreSQL conteneurisé (Docker) avec l'extension **pgvector**
-* **IA & Modèles (Google Gemini)** :
-  * `gemini-1.5-pro` : Analyse et structuration de textes complexes.
-  * `gemini-1.5-flash` : Classification rapide (déduction du secteur).
+* **IA & Modèles (Groq et Google Gemini)** :
+  * `openai/gpt-oss-20b` : Analyse et structuration de textes complexes + Classification rapide (déduction du secteur).
   * `text-embedding-004` : Création des embeddings (vecteurs mathématiques de 3072 dimensions).
 * **Traitement PDF** : PyMuPDF (`pymupdf`)
 
